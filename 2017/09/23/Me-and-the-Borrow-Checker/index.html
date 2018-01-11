@@ -1,28 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
-  <title>取何名字好呢</title>
-  
-  <link href="/atom.xml" rel="self"/>
-  
-  <link href="http://yoursite.com/"/>
-  <updated>2018-01-11T14:59:23.746Z</updated>
-  <id>http://yoursite.com/</id>
-  
-  <author>
-    <name>hch12907</name>
-    
-  </author>
-  
-  <generator uri="http://hexo.io/">Hexo</generator>
-  
-  <entry>
-    <title>Rust的Borrow Checker</title>
-    <link href="http://yoursite.com/2017/09/23/Me-and-the-Borrow-Checker/"/>
-    <id>http://yoursite.com/2017/09/23/Me-and-the-Borrow-Checker/</id>
-    <published>2017-09-22T16:41:16.000Z</published>
-    <updated>2018-01-11T14:59:23.746Z</updated>
-    
-    <content type="html"><![CDATA[<p>Rust是一门挺新的语言。它的v1.0版本在大概2015年发布——真的挺新的，不是吗？它雄心勃勃，声称它是一门<strong>安全的语言</strong>，可以阻止segfault的发生。今天我就不谈些什么，就说说让Rust有这个底气，说这种话的家伙 —— Borrow Checker（借用检查器）。<br><a id="more"></a><br>说Borrow checker（借用检查器）之前，我们要知道——什么是借用。</p>
+<!DOCTYPE html><html lang="zh"><head><meta charset="utf-8"><meta name="X-UA-Compatible" content="IE=edge"><title> Rust的Borrow Checker · 取何名字好呢</title><meta name="description" content="Rust的Borrow Checker - hch12907"><meta name="viewport" content="width=device-width, initial-scale=1"><link rel="icon" href="/favicon.png"><link rel="stylesheet" href="/css/apollo.css"><link rel="search" type="application/opensearchdescription+xml" href="http://yoursite.com/atom.xml" title="取何名字好呢"></head><body><div class="wrap"><header><a href="/" class="logo-link"><img src="/favicon.png" alt="logo"></a><ul class="nav nav-list"><li class="nav-list-item"><a href="/" target="_self" class="nav-list-link">BLOG</a></li><li class="nav-list-item"><a href="/archives/" target="_self" class="nav-list-link">ARCHIVE</a></li><li class="nav-list-item"><a href="https://github.com/hch12907" target="_blank" class="nav-list-link">GITHUB</a></li></ul></header><main class="container"><div class="post"><article class="post-block"><h1 class="post-title">Rust的Borrow Checker</h1><div class="post-info">Sep 23, 2017</div><div class="post-content"><p>Rust是一门挺新的语言。它的v1.0版本在大概2015年发布——真的挺新的，不是吗？它雄心勃勃，声称它是一门<strong>安全的语言</strong>，可以阻止segfault的发生。今天我就不谈些什么，就说说让Rust有这个底气，说这种话的家伙 —— Borrow Checker（借用检查器）。<br><a id="more"></a><br>说Borrow checker（借用检查器）之前，我们要知道——什么是借用。</p>
 <h1 id="借用？"><a href="#借用？" class="headerlink" title="借用？"></a>借用？</h1><p>Rust是一门很明确而不含糊的语言。这话是什么意思呢？我是个喜欢上例子的人，就给俩例子吧：<br><figure class="highlight rust"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">int main() &#123;</div><div class="line">    int x = <span class="number">1000</span>;</div><div class="line">    int y = x;</div><div class="line">    cout &lt;&lt; x &lt;&lt; <span class="string">" "</span> &lt;&lt; y;</div><div class="line">    <span class="comment">// 输出： 1000 1000</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 <figure class="highlight rust"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</div><div class="line">    <span class="keyword">let</span> x = <span class="number">1000</span>;</div><div class="line">    <span class="keyword">let</span> y = x;</div><div class="line">    <span class="built_in">println!</span>(<span class="string">"&#123;&#125; &#123;&#125;"</span>, x, y);</div><div class="line">    <span class="comment">// 编译错误：Use of moved value: `x`</span></div><div class="line">    <span class="comment">// x的值已被移动去y，因此x的值不能再次被使用。</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p>相信大家都能理解上面两段小代码。</p>
@@ -64,19 +40,4 @@
 <p>根据这个方案，borrow checker会检查变量的借用会在何时停止。因此，未来Rust可能会有以下代码：<br><figure class="highlight rust"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">let</span> x = <span class="number">100</span>;</div><div class="line"><span class="keyword">let</span> y = &amp;x;</div><div class="line"><span class="comment">/* 对y进行工作 ... */</span></div><div class="line">process(&amp;x); <span class="comment">// 编译成功，因为y之后已经不再被使用了，也就是说x能够安全地被借走了。</span></div></pre></td></tr></table></figure></p>
 <figure class="highlight rust"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">fn</span> <span class="title">process</span></span>(map: HashMap&lt;<span class="built_in">String</span>, <span class="built_in">i32</span>&gt;, x: <span class="built_in">i32</span>) &#123;</div><div class="line">    <span class="comment">// 尝试获得字典里的foo</span></div><div class="line">    <span class="keyword">match</span> map.get(<span class="string">"foo"</span>) &#123;</div><div class="line">        <span class="comment">// 如果有，就打印出来它的值</span></div><div class="line">        <span class="literal">Some</span>(<span class="keyword">ref</span> val) =&gt; <span class="built_in">println!</span>(<span class="string">"&#123;&#125;"</span>, val), </div><div class="line"></div><div class="line">        <span class="comment">// 此时，map的内容也没被其他人用，因此map.get的引用停留在这里了。</span></div><div class="line">        <span class="comment">// 因此，下一行代码的insert能正常通过编译。</span></div><div class="line">        <span class="literal">None</span> =&gt; map.insert(<span class="string">"foo"</span>, x)</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <p><br><br><br><br><br><em>最后编辑于：2018年1月6日 15:59</em></p>
-]]></content>
-    
-    <summary type="html">
-    
-      &lt;p&gt;Rust是一门挺新的语言。它的v1.0版本在大概2015年发布——真的挺新的，不是吗？它雄心勃勃，声称它是一门&lt;strong&gt;安全的语言&lt;/strong&gt;，可以阻止segfault的发生。今天我就不谈些什么，就说说让Rust有这个底气，说这种话的家伙 —— Borrow Checker（借用检查器）。&lt;br&gt;
-    
-    </summary>
-    
-    
-      <category term="programming" scheme="http://yoursite.com/tags/programming/"/>
-    
-      <category term="rust" scheme="http://yoursite.com/tags/rust/"/>
-    
-  </entry>
-  
-</feed>
+</div></article></div></main><footer><div class="paginator"></div><div class="copyright"><p>© 2017 - 2018 <a href="http://yoursite.com">hch12907</a>, powered by <a href="https://hexo.io/" target="_blank">Hexo</a> and <a href="https://github.com/pinggod/hexo-theme-apollo" target="_blank">hexo-theme-apollo</a>.</p></div></footer></div><script async src="//cdn.bootcss.com/mathjax/2.7.0/MathJax.js?config=TeX-MML-AM_CHTML" integrity="sha384-crwIf/BuaWM9rM65iM+dWFldgQ1Un8jWZMuh3puxb8TOY9+linwLoI7ZHZT+aekW" crossorigin="anonymous"></script><script>(function(b,o,i,l,e,r){b.GoogleAnalyticsObject=l;b[l]||(b[l]=function(){(b[l].q=b[l].q||[]).push(arguments)});b[l].l=+new Date;e=o.createElement(i);r=o.getElementsByTagName(i)[0];e.src='//www.google-analytics.com/analytics.js';r.parentNode.insertBefore(e,r)}(window,document,'script','ga'));ga('create',"UA-65933410-1",'auto');ga('send','pageview');</script></body></html>
