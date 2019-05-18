@@ -57,7 +57,7 @@
 <p><br></p>
 <p>结果borrow checker就报错了。</p>
 <blockquote>
-<p>在<code>map.get(&quot;foo&quot;)</code>这里, map被match借走了。而<code>map.insert()</code>这段代码还在match的作用域内，因此在<code>insert()</code>被调用的时候<br>map依然正在被match借着。显然，<code>None =&gt; {...}</code> 是没有用到<code>map.get()</code>的值的，所以这次报错是个误报。</p>
+<p>在<code>map.get(&quot;foo&quot;)</code>这里, <code>map</code>被<code>match</code>借走了。而<code>map.insert()</code>这段代码还在<code>match</code>的作用域内，<br>因此在<code>insert()</code>被调用的时候<code>map</code>依然正在被<code>match</code>借着。显然，<code>None =&gt; {...}</code> 是没有用到<code>map.get()</code>的值的，所以这次报错是个误报。</p>
 </blockquote>
 <p>为了解决这个问题，开发者们搞出来了<strong>Non-Lexical Lifetime （简称NLL）</strong>这个东西。非作用域生命周期，不被绑定在某个作用域的生命周期。<br>本质上是允许物件、引用的生命周期在一定条件下被拉长、缩短，而非将其与作用域的生命周期等同。比如说在确认物件后期不再被使用的情况下，缩短其生命周期。（如果你不要用同学的东西了，却还一直借着他的东西直到放学，不就是在耍赖么）</p>
 <figure class="highlight rust"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">fn</span> <span class="title">main</span></span>() &#123;</span><br><span class="line">    <span class="keyword">let</span> <span class="keyword">mut</span> a = Object::new();</span><br><span class="line">    <span class="keyword">let</span> b = bar(&amp;<span class="keyword">mut</span> a);</span><br><span class="line">    <span class="keyword">let</span> c = baz(&amp;a);     <span class="comment">// 没事，反正`b`已经没用了，缩短`b`的生命周期呗</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
