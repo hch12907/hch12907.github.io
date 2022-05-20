@@ -1,0 +1,32 @@
+.main-container {
+	min-height: 90vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	flex-direction: column;
+}
+
+.item {
+	font-family: Roboto,Helvetica,Arial,sans-serif;
+}
+
+.header {
+	font-size: 6em;
+}
+
+.subtitle {
+	font-size: 1.8em;
+	text-align: center;
+	color: #666666
+}
+
+.footer-container {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.footer {
+	font-size: 1em;
+	color: #888888
+}
