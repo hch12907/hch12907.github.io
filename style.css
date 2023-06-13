@@ -8,14 +8,19 @@
 
 .item {
 	font-family: Roboto,Helvetica,Arial,sans-serif;
+	margin-top: 0.25em;
+	margin-bottom: 0.25em;
 }
 
 .header {
-	font-size: 6em;
+	font-size: 5em;
+	line-height: 1em;
+	text-align: center;
 }
 
 .subtitle {
-	font-size: 1.8em;
+	font-size: 1.6em;
+	line-height: 1.2em;
 	text-align: center;
 	color: #666666
 }
